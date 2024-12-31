@@ -1,28 +1,22 @@
 import axios from "axios";
 
 export interface Article {
-  author: string; // Author can be null if missing
+  author: string;
   title: string;
-  type: string; // 'news' or 'blog'
-  publishedAt: string; // ISO date string
-  description?: string; // Optional property
+  type: string;
+  publishedAt: string;
+  description?: string;
 }
 
 export const fetchArticles = async (): Promise<Article[]> => {
   try {
-    const response = await axios.get("https://newsapi.org/v2/top-headlines", {
-      params: {
-        country: "us",
-        pageSize: 100, 
-        apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY as string,
-      },
-    });
+    const response = await axios.get("/api/news"); // Call the proxy API route
 
-    const filteredArticles = response.data.articles.filter(
+    // Assuming the response data has the same structure as before
+    const filteredArticles = response.data.filter(
       (article: Article) => article.title && article.title !== "[Removed]"
     );
 
-    // Map API response to match the Article interface
     return filteredArticles.map((article: Article) => ({
       author: article.author || "Unknown",
       title: article.title || "Untitled",
