@@ -16,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       params: {
         country: "us",
         pageSize: 100,
-        apiKey: process.env.NEWS_API_KEY as string, // Make sure to add the key to your environment variables
+        apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY as string, // Make sure to add the key to your environment variables
       },
     });
 
