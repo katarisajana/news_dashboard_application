@@ -17,5 +17,5 @@ export default NextAuth({
     },
   },
   debug: true,
-  secret: process.env.NEXTAUTH_SECRET as string,
+  secret: process.env.NEXTAUTH_SECRET,
 });
