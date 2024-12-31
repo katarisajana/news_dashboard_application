@@ -1,7 +1,7 @@
 import React from "react";
 import jsPDF from "jspdf";
 import { saveAs } from "file-saver";
-import { Article } from "../utils/api";
+import { Article } from "@/api/news";
 
 interface ExportProps {
   articles: Article[];
