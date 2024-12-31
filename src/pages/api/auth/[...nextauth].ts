@@ -9,7 +9,7 @@ export default NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
+    async session({ session }) {
         // if (session.user) {
         //     session.user.id = token.sub as string;
         //   }
