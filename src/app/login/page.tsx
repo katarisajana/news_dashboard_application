@@ -1,6 +1,6 @@
-"use client"
-import { useState } from "react";
-import { useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -8,12 +8,22 @@ const Login = () => {
   const { data: session } = useSession();
   const router = useRouter();
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   useEffect(() => {
-    if (session || localStorage.getItem("isAuthenticated") === "True") {
-      // If session exists (user is logged in), redirect to dashboard
+    // Check if user is authenticated on the client side
+    if (typeof window !== "undefined") {
+      const storedAuth = localStorage.getItem("isAuthenticated");
+      setIsAuthenticated(storedAuth === "True");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (session || isAuthenticated) {
+      // Redirect to dashboard if authenticated
       router.push("/");
     }
-  }, [session, router]);
+  }, [session, isAuthenticated, router]);
 
   // State for email and password login
   const [email, setEmail] = useState<string>("");
@@ -21,72 +31,79 @@ const Login = () => {
 
   // Handle email/password login
   const handleLogin = () => {
-    const storedEmail = localStorage.getItem("email");
-    const storedPassword = localStorage.getItem("password");
+    if (typeof window !== "undefined") {
+      const storedEmail = localStorage.getItem("email");
+      const storedPassword = localStorage.getItem("password");
 
-    if (email === storedEmail && password === storedPassword) {
-      localStorage.setItem("isAuthenticated", "True");
-      alert("Login successful!");
-      if (email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD)
-        localStorage.setItem("isAdmin", "True")
-      router.push("/");
-    } else {
-      alert("Invalid credentials!");
+      if (email === storedEmail && password === storedPassword) {
+        localStorage.setItem("isAuthenticated", "True");
+        alert("Login successful!");
+        if (
+          email === process.env.NEXT_PUBLIC_ADMIN_EMAIL &&
+          password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD
+        )
+          localStorage.setItem("isAdmin", "True");
+        router.push("/");
+      } else {
+        alert("Invalid credentials!");
+      }
     }
   };
 
   // Handle email/password signup
   const handleSignup = () => {
-    if (email.length!=0 && password.length!=0) {
-      localStorage.setItem("email", email);
-      localStorage.setItem("password", password);
-      alert("Signup successful! You can now log in.");
-      setEmail("");
-      setPassword("");
-    }
-    else
-    {
-      alert("Email and password should not be empty.");
+    if (typeof window !== "undefined") {
+      if (email.length !== 0 && password.length !== 0) {
+        localStorage.setItem("email", email);
+        localStorage.setItem("password", password);
+        alert("Signup successful! You can now log in.");
+        setEmail("");
+        setPassword("");
+      } else {
+        alert("Email and password should not be empty.");
+      }
     }
   };
 
   // Handle logout
   const handleLogout = () => {
-    localStorage.setItem("isAuthenticated", "False");
-    setEmail("");
-    setPassword("");
-    router.push("/login");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("isAuthenticated", "False");
+      setEmail("");
+      setPassword("");
+      router.push("/login");
+    }
   };
 
   return (
     <div className="p-7">
-      {(session || (localStorage.getItem("isAuthenticated")=="True")) ? (
+      {session || isAuthenticated ? (
         <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {session?.user?.image && (
-            <img
-              src={session.user.image}
-              alt="User Profile"
-              className="w-16 h-16 rounded-full mr-4"
-            />
-          )}
-          <p className="text-lg font-semibold">
-            Welcome, {session?.user?.name || email || "User"}!
-          </p>
+          <div className="flex items-center">
+            {session?.user?.image && (
+              <img
+                src={session.user.image}
+                alt="User Profile"
+                className="w-16 h-16 rounded-full mr-4"
+              />
+            )}
+            <p className="text-lg font-semibold">
+              Welcome, {session?.user?.name || email || "User"}!
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (session) {
+                signOut();
+              } else {
+                handleLogout();
+              }
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            {session ? "Sign Out" : "Logout"}
+          </button>
         </div>
-        <button
-          onClick={() => {
-            if (session) {
-              signOut();
-            } else {
-              handleLogout();
-            }
-          }}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          {session ? "Sign Out" : "Logout"}
-        </button>
-      </div>
       ) : (
         <div className="flex flex-col items-center py-40 min-h-screen bg-gray-100 w-full border">
           <p className="mb-8 text-2xl font-bold">Login to continue.</p>
@@ -139,4 +156,3 @@ const Login = () => {
 };
 
 export default Login;
-
